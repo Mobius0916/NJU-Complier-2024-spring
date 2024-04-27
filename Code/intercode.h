@@ -30,7 +30,9 @@ struct CodeList_{
     CodeList next; 
 };
 
-char* trans_intercode(InterCode code);
+char* trans_InterCode(InterCode code);
+
+char* trans_Operand(Operand op);
 
 void inter_code(char* file, struct Node* root);
 
@@ -45,6 +47,8 @@ Operand new_label();
 Operand new_temp();
 
 Operand new_constant();
+
+Operand look_up_hash(struct Node* node);
 
 void output(char* file);
 

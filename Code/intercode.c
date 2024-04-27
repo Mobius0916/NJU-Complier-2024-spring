@@ -12,8 +12,24 @@ extern HashNode HashMap[HASHMAP_SIZE];
 CodeList InterCodes;
 int variable_num = 0, label_num = 0;
 
-char* trans_intercode(InterCode code){
+char* trans_InterCode(InterCode code){
+    char* output = malloc(sizeof(char) * 100);
+    memset(output, 0, sizeof(char) * 100);
+    if(code -> kind == LABEL_i){
+        char* x = translate_Operand(code -> u.op);
+        sprintf(output, "LABEL %s :", x);
+    }
+    return output;
+}
 
+char* trans_Operand(Operand op){
+    char* tmp = malloc(sizeof(char) * 100);
+    if(op -> kind == CONSTANT) sprintf(tmp, "#%d", op -> u.val);
+    else if(op -> kind == LABEL) sprintf(tmp, "l%d", op -> u.label_id);
+    else sprintf(tmp, "t%d", op -> u.variable_id);
+    char* output = malloc(sizeof(char) * 101);
+    strcpy(output, tmp);
+    return output;
 }
 
 void Add_intercode(CodeList code){ // Add Code to the tail of  [intercodes_head -> intercodes_tail]
@@ -79,7 +95,7 @@ void output(char* file){ // print three address code into file
 
     CodeList tmp = InterCodes;
     while(tmp != NULL){
-        char* line = trans_intercode(tmp -> code);
+        char* line = trans_InterCode(tmp -> code);
         if (strlen(line)) fprintf(fp, "%s\n", line);
         tmp = tmp -> next;
     }
