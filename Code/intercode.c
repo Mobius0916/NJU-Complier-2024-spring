@@ -16,7 +16,7 @@ char* trans_InterCode(InterCode code){
     char* output = malloc(sizeof(char) * 100);
     memset(output, 0, sizeof(char) * 100);
     if(code -> kind == LABEL_i){
-        char* x = translate_Operand(code -> u.op);
+        char* x = trans_Operand(code -> u.op);
         sprintf(output, "LABEL %s :", x);
     }
     return output;
