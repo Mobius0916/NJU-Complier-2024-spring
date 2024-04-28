@@ -398,7 +398,6 @@ Operand look_up_hash(struct Node* node){
 int childsize(struct Node* father){
     int size = 0;
     struct Node* child = father -> child;
-    if (child == NULL) return 0;
     while(child != NULL){
         size++;
         child = child -> brother;
