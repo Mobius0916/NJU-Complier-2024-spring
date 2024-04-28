@@ -46,6 +46,14 @@ CodeList trans_Stmt(struct Node* Stmt);
 
 CodeList trans_Exp(struct Node* node, Operand place);
 
+CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false);
+
+CodeList trans_Dec(struct Node* Dec);
+
+CodeList trans_DecList(struct Node* DecList);
+
+CodeList trans_Def(struct Node* Def);
+
 CodeList trans_DefList(struct Node* DefList);
 
 CodeList trans_StmtList(struct Node* StmtList);

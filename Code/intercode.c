@@ -259,10 +259,51 @@ CodeList trans_Exp(struct Node* node, Operand place){
     }
 }
 
+CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
+
+}
+
+CodeList trans_Dec(struct Node* Dec){
+    /*
+    Dec → VarDec
+    | VarDec ASSIGNOP Exp
+    */
+    assert(Dec -> child != NULL);
+    struct Node* VarDec = Dec -> child;
+    if (VarDec -> brother != NULL && !strcmp(VarDec -> brother -> name, "ASSIGNOP\0")){
+        if (!strcmp(VarDec -> child -> name, "ID\0")){
+            Operand op = look_up_hash(VarDec -> child);
+            return trans_Exp(Dec -> child -> brother -> brother, op);
+        }
+    }
+    else{ //?
+
+    }
+}
+
+CodeList trans_DecList(struct Node* DecList){
+    /*
+    DecList → Dec
+    | Dec COMMA DecList
+    */
+    assert(DecList -> child != NULL);
+    CodeList code = NULL;
+    while(DecList -> child -> brother != NULL){
+        struct Node* Dec = DecList -> child;
+        code = Join_intercode(code, trans_Dec(Dec));
+        DecList = DecList -> child -> brother;
+    }
+    code = Join_intercode(code, trans_Dec(DecList -> child));
+    return code;
+}
+
 CodeList trans_Def(struct Node* Def){
     /*
     Def → Specifier DecList SEMI
     */
+    assert(Def -> child != NULL || Def -> child -> brother != NULL);
+    struct Node* DecList = Def -> child -> brother;
+    return trans_DecList(DecList);
 }
 
 CodeList trans_DefList(struct Node* DefList){
@@ -293,24 +334,26 @@ CodeList trans_StmtList(struct Node* StmtList){
     return code;
 }
 
-CodeList trans_CompSt(struct Node* node){
+CodeList trans_CompSt(struct Node* CompSt){
     /*
     CompSt → LC DefList StmtList RC
     */
-    struct Node* child = node -> child -> brother;
+    assert(CompSt -> child != NULL);
+    struct Node* child = CompSt -> child -> brother;
     CodeList code1 = trans_DefList(child);
     CodeList code2 = trans_StmtList(child -> brother);
     return Join_intercode(code1, code2);
 }
 
-void trans_ExtDef(struct Node* node){
+void trans_ExtDef(struct Node* ExtDef){
     /*
     ExtDef → Specifier ExtDecList SEMI
     | Specifier SEMI
     | Specifier FunDec CompSt
     */
-    struct Node* child = node -> child -> brother;
-    if (!strcmp(child -> name, "FunDec\0") && childsize(node) == 3){
+    assert(ExtDef -> child != NULL);
+    struct Node* child = ExtDef -> child -> brother;
+    if (!strcmp(child -> name, "FunDec\0") && childsize(ExtDef) == 3){
         struct Node* brother = child -> brother;
         Join_intercode(trans_FunDec(child), trans_CompSt(brother));
     }
@@ -326,15 +369,14 @@ void trans_ExtDefList(struct Node* ExtDefList){
         trans_ExtDef(ExtDef);
         if (ExtDefList -> child != NULL) ExtDefList = ExtDefList -> child -> brother;
     }
-    return code;
 }
 
-void trans_Program(struct Node* node){
+void trans_Program(struct Node* Program){
     /*
     Program → ExtDefList
     */
-    struct Node* child = node -> child;
-    if (child != NULL) trans_ExtDefList(child);
+    struct Node* ExtDefList = Program -> child;
+    if (ExtDefList != NULL) trans_ExtDefList(ExtDefList);
 }
 
 void build_inter_code(struct Node* root){ 

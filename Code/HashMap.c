@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include<stdbool.h>
+#include <stdbool.h>
+#include <assert.h>
 #include "HashMap.h"
 #include "Node.h"
 extern unsigned SemanticError;
