@@ -20,7 +20,7 @@ struct InterCode_{
     enum{LABEL_i, FUNC_i, ASSIGN_i, PLUS_i, MINUS_i, MUL_i, DIV_i, GOTO_i, IF_GOTO_i, RET_i, DEC_i, ARG_i, CALL_i, PARAM_i, READ, WRITE} kind;
     union{
         Operand op;
-
+        char* func;
     }u;
 };
 
@@ -34,13 +34,29 @@ char* trans_InterCode(InterCode code);
 
 char* trans_Operand(Operand op);
 
-void inter_code(char* file, struct Node* root);
+void Add_intercode(CodeList code);
+
+CodeList Join_intercode(CodeList code1, CodeList code2);
+
+CodeList trans_FunDec(struct Node* node);
+
+CodeList trans_Stmt(struct Node* node);
+
+CodeList trans_StmtList(struct Node* node);
+
+CodeList trans_CompSt(struct Node* node);
+
+void trans_ExtDecList(struct Node* node);
+
+void trans_ExtDef(struct Node* node);
+
+void trans_ExtDefList(struct Node* node);
+
+void trans_Program(struct Node* node);
 
 void build_inter_code(struct Node* root);
 
-void Add_intercode(CodeList code);
-
-void Join_intercode(CodeList code1, CodeList code2);
+void inter_code(char* file, struct Node* root);
 
 Operand new_label();
 
@@ -48,7 +64,13 @@ Operand new_temp();
 
 Operand new_constant();
 
+InterCode new_intercode(int kind);
+
+CodeList new_codelist(InterCode code);
+
 Operand look_up_hash(struct Node* node);
+
+int childsize(struct Node* father);
 
 void output(char* file);
 

@@ -63,7 +63,7 @@ Type Specifier(struct Node* node){
 	struct Node* child = node -> child;
 	Type type = (Type) malloc(sizeof(struct Type_));
 	if(!strcmp(child -> name, "TYPE\0")){
-		if(child->is_type == 1){
+		if(child -> is_type == 1){
 			type -> kind = BASIC;
 			type -> u.basic = INT;
 		}
