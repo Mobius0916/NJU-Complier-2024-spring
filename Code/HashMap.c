@@ -272,3 +272,20 @@ int getsize(Type type){
 		}
 		if (type -> kind == STRUCTURE) return getsize(type -> u.structure -> type);
 }
+
+int get_array_size(struct Node* Exp){
+	assert(!strcmp(Exp -> child -> brother -> name, "LB\0"));
+	FieldList look = lookup_hash(Exp -> child -> TYPE_ID);
+	return getsize(look -> type -> u.array.elem);
+}
+
+int get_struct_offset(Type type, char* name){
+	assert(type -> kind == STRUCTURE);
+	int offset = 0;
+	FieldList tmp = type -> u.structure -> type -> u.structmember;
+	while(strcmp(tmp -> name, name) != 0){
+		offset += getsize(tmp -> type);
+		tmp = tmp -> tail;
+	}
+	return offset;
+}

@@ -43,7 +43,7 @@ void DecList(struct Node*node,Type type,FieldList field);
 
 void Dec(struct Node*node,Type type,FieldList field);
 
-Type Exp(struct Node*node);
+Type Exp(struct Node* node);
 
 FieldList Args(struct Node*node);
 

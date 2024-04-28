@@ -57,4 +57,6 @@ bool FuncArgMatch(FieldList func1,FieldList func2);
 FieldList HaveMember(Type type,char *ID);
 void CheckUndefFunc();
 int getsize(Type type);
+int get_array_size(struct Node* Exp);
+int get_struct_offset(Type type, char* name);
 #endif

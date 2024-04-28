@@ -17,10 +17,12 @@ struct Operand_{
 };
 
 struct InterCode_{
-    enum{LABEL_i, FUNC_i, ASSIGN_i, PLUS_i, MINUS_i, MUL_i, DIV_i, GOTO_i, IF_GOTO_i, RET_i, DEC_i, ARG_i, CALL_i, PARAM_i, READ, WRITE} kind;
+    enum{LABEL_i, FUNC_i, ASSIGN_i, PLUS_i, MINUS_i, MUL_i, DIV_i, GOTO_i, IF_GOTO_i, RET_i, DEC_i, ARG_i, CALL_i, PARAM_i, CHANGE_ADDR, READ, WRITE} kind;
     union{
         Operand op;
         char* func;
+        struct { Operand left, right; } assign;
+        struct { Operand operand1, operand2, result; } binop;
     }u;
 };
 
@@ -40,9 +42,13 @@ CodeList Join_intercode(CodeList code1, CodeList code2);
 
 CodeList trans_FunDec(struct Node* node);
 
-CodeList trans_Stmt(struct Node* node);
+CodeList trans_Stmt(struct Node* Stmt);
 
-CodeList trans_StmtList(struct Node* node);
+CodeList trans_Exp(struct Node* node, Operand place);
+
+CodeList trans_DecList(struct Node* node);
+
+CodeList trans_StmtList(struct Node* StmtList);
 
 CodeList trans_CompSt(struct Node* node);
 
