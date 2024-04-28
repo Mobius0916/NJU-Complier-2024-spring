@@ -259,8 +259,24 @@ CodeList trans_Exp(struct Node* node, Operand place){
     }
 }
 
-CodeList trans_DecList(struct Node* node){
-    
+CodeList trans_Def(struct Node* Def){
+    /*
+    Def → Specifier DecList SEMI
+    */
+}
+
+CodeList trans_DefList(struct Node* DefList){
+    /*
+    DefList → Def DefList
+    | e
+    */
+    CodeList code = NULL;
+    while(DefList != NULL){
+        struct Node* Def = DefList -> child;
+        code = Join_intercode(code, trans_Def(Def));
+        if (Def != NULL) DefList = Def -> brother;
+    }
+    return code;
 }
 
 CodeList trans_StmtList(struct Node* StmtList){
@@ -269,10 +285,10 @@ CodeList trans_StmtList(struct Node* StmtList){
     | e
     */
     CodeList code = NULL;
-    struct Node* Stmt = StmtList -> child;
-    while(Stmt != NULL){
+    while (StmtList != NULL){
+        struct Node* Stmt = StmtList -> child;
         code = Join_intercode(code, trans_Stmt(Stmt));
-        Stmt = Stmt -> brother;
+        if (Stmt != NULL) StmtList = Stmt -> brother;
     }
     return code;
 }
@@ -300,16 +316,17 @@ void trans_ExtDef(struct Node* node){
     }
 }   
 
-void trans_ExtDefList(struct Node* node){
+void trans_ExtDefList(struct Node* ExtDefList){
     /*
     ExtDefList → ExtDef ExtDefList
     | e
     */
-    struct Node* tmp = node -> child;
-    while(tmp != NULL){
-        trans_ExtDef(tmp);
-        tmp = tmp -> brother;
+    while (ExtDefList != NULL){
+        struct Node* ExtDef = ExtDefList -> child;
+        trans_ExtDef(ExtDef);
+        if (ExtDefList -> child != NULL) ExtDefList = ExtDefList -> child -> brother;
     }
+    return code;
 }
 
 void trans_Program(struct Node* node){

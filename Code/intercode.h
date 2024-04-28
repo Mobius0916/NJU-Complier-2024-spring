@@ -46,7 +46,7 @@ CodeList trans_Stmt(struct Node* Stmt);
 
 CodeList trans_Exp(struct Node* node, Operand place);
 
-CodeList trans_DecList(struct Node* node);
+CodeList trans_DefList(struct Node* DefList);
 
 CodeList trans_StmtList(struct Node* StmtList);
 
