@@ -24,6 +24,7 @@ struct InterCode_{
         struct { Operand left, right; } assign;
         struct { Operand operand1, operand2, result; } binop;
         struct { Operand x; int size; } dec;
+        struct { Operand result; char* func; } call;
     }u;
 };
 

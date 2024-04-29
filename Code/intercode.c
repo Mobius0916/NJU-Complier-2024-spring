@@ -206,6 +206,31 @@ CodeList trans_Exp(struct Node* node, Operand place){
   
         }
 
+        if (!strcmp(node -> child -> brother -> name, "PLUS\0") || !strcmp(node -> child -> brother -> name, "MINUS\0") || !strcmp(node -> child -> brother -> name, "STAR\0") || !strcmp(node -> child -> brother -> name, "DIV\0")){
+            Operand tmp1 = new_temp(VARIABLE), tmp2 = new_temp(VARIABLE);
+            CodeList code1 = trans_Exp(node -> child, tmp1);
+            CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
+            CodeList code3 = NULL;
+            if (place != NULL){
+                InterCode code = (InterCode) malloc(sizeof(InterCode)); 
+                code -> u.binop.operand1 = tmp1;
+                code -> u.binop.operand2 = tmp2;
+                code -> u.binop.result = place;
+                if (!strcmp(node -> child -> brother -> name, "PLUS\0")) code -> kind = PLUS_i;
+                else if (!strcmp(node -> child -> brother -> name, "MINUS\0")) code -> kind = MINUS_i;
+                else if (!strcmp(node -> child -> brother -> name, "STAR\0")) code -> kind = MUL_i;
+                else if (!strcmp(node -> child -> brother -> name, "DIV\0")) code -> kind = DIV_i;
+                code3 = new_codelist(code);
+            }
+            return Join_intercode(Join_intercode(code1, code2), code3);
+        }
+
+        if (!strcmp(node -> child -> name, "LP\0")) return trans_Exp(node -> child -> brother, place);
+
+        if (!strcmp(node -> child -> brother -> name, "LP\0")){
+
+        }
+
         if (!strcmp(node -> child -> brother -> name, "DOT\0")){
             if (place == NULL) return NULL;
             Type type = Exp(node -> child);
@@ -260,7 +285,7 @@ CodeList trans_Exp(struct Node* node, Operand place){
 }
 
 CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
-    
+
 }
 
 CodeList trans_Dec(struct Node* Dec){
