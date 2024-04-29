@@ -8,7 +8,7 @@ typedef struct InterCode_* InterCode;
 typedef struct CodeList_* CodeList;
 
 struct Operand_{
-    enum {VARIABLE, ADDRESS, LABEL, CONSTANT} kind;
+    enum {VARIABLE, ADDRESS, LABEL, CONSTANT, ARR_STRU} kind;
     union{
         int variable_id;
         int label_id;
@@ -23,6 +23,7 @@ struct InterCode_{
         char* func;
         struct { Operand left, right; } assign;
         struct { Operand operand1, operand2, result; } binop;
+        struct { Operand x; int size; } dec;
     }u;
 };
 
@@ -85,6 +86,8 @@ CodeList new_codelist(InterCode code);
 Operand look_up_hash(struct Node* node);
 
 int childsize(struct Node* father);
+
+struct Node* get_VarDec_ID(struct Node* VarDec);
 
 void output(char* file);
 

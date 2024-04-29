@@ -260,11 +260,11 @@ CodeList trans_Exp(struct Node* node, Operand place){
 }
 
 CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
-
+    
 }
 
 CodeList trans_Dec(struct Node* Dec){
-    /*
+    /* ju bu bian liang
     Dec → VarDec
     | VarDec ASSIGNOP Exp
     */
@@ -276,8 +276,18 @@ CodeList trans_Dec(struct Node* Dec){
             return trans_Exp(Dec -> child -> brother -> brother, op);
         }
     }
-    else{ //?
-
+    else{ //DEC   array or structure  (9)
+        struct Node* ID = get_VarDec_ID(VarDec);
+        FieldList look = lookup_hash(ID -> TYPE_ID);
+        if (look -> type -> kind == ARRAY || look -> type -> kind == STRUCTURE){
+            Operand op = new_temp(ARR_STRU);
+            InterCode code = new_intercode(DEC_i);
+            int size = getsize(look -> type);
+            code -> u.dec.size = size;
+            code -> u.dec.x = op;
+            look -> op = op;
+            return new_codelist(code);
+        } 
     }
 }
 
@@ -445,6 +455,12 @@ int childsize(struct Node* father){
         child = child -> brother;
     }
     return size;
+}
+
+struct Node* get_VarDec_ID(struct Node* VarDec){
+    struct Node* tmp = VarDec;
+    while(strcmp(tmp -> name, "ID\0") != 0) tmp = tmp -> child;
+    return tmp;
 }
 
 void output(char* file){ // print three address code into file
