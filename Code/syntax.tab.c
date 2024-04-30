@@ -2165,19 +2165,19 @@ int main(int argc, char** argv) {
 	    return 1;
     }
     LexError = 0, SyntaxError = 0;
-    printf("Parse begin!\n");
+    //printf("Parse begin!\n");
     yyrestart(f);
     yyparse();
-    printf("Parse end!\n");
+    //printf("Parse end!\n");
     if(LexError == 0 && SyntaxError == 0){
-        printf("Semantic anyasis begin !\n");
+        //printf("Semantic anyasis begin !\n");
 	    semantic_anyasis(root);
-        printf("Semantic anyasis end!\n");
+        //printf("Semantic anyasis end!\n");
 	    //PrintMap();
-        printf("Build intercodes begin !\n");
+        //printf("Build intercodes begin !\n");
 		if (argc >= 3) inter_code(argv[2], root);
         else inter_code(NULL, root);
-        printf("Build intercodes end !\n");
+        //printf("Build intercodes end !\n");
 	}
     return 0;
 

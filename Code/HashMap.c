@@ -6,6 +6,7 @@
 #include "HashMap.h"
 #include "Node.h"
 #include "intercode.h"
+#include "semantic.h"
 
 extern unsigned SemanticError;
 HashNode HashMap[HASHMAP_SIZE];
@@ -207,7 +208,7 @@ void PrintSemErr(unsigned type, unsigned linenum, char* elem){
 	 elem = (char*) malloc(sizeof(char));
 	 elem[0] = ' ';
 	}
-	switch(type){
+	/*switch(type){
 		case 1 : printf("Error type %d at Line %d:Undefined variable '%s'.\n", type, linenum, elem); break;
 		case 2 : printf("Error type %d at Line %d:Undefined function '%s'.\n", type, linenum, elem); break;
 		case 3 : printf("Error type %d at Line %d:Redefined variable '%s'.\n", type, linenum, elem); break;
@@ -228,7 +229,7 @@ void PrintSemErr(unsigned type, unsigned linenum, char* elem){
 		case 18 : printf("Error type %d at Line %d:Undefined function '%s'\n", type, linenum, elem); break;
 		case 19 : printf("Error type %d at Line %d:Inconsistent declaration of function '%s'.\n", type, linenum, elem); break;
 		default : printf("Undefined Error!\n");
-	}
+	}*/
 }
 
 bool TypeMatch(Type a, Type b){
@@ -309,10 +310,10 @@ int getsize(Type type){
 		if (type -> kind == STRUCTURE) return getsize(type -> u.structure -> type);
 }
 
-int get_array_size(struct Node* Exp){
-	assert(!strcmp(Exp -> child -> brother -> name, "LB\0"));
-	FieldList look = lookup_hash(Exp -> child -> TYPE_ID);
-	return getsize(look -> type -> u.array.elem);
+int get_array_size(struct Node* node){
+	assert(!strcmp(node -> child -> brother -> name, "LB\0"));
+	Type type = Exp(node -> child);
+	return getsize(type -> u.array.elem);
 }
 
 int get_struct_offset(Type type, char* name){

@@ -105,6 +105,7 @@ char* trans_InterCode(InterCode code){
     else if (code -> kind == ARG_i){
         char* x = trans_Operand(code -> u.op);
         if (code -> u.op -> kind == ADDRESS) sprintf(output, "ARG %s", x);   
+        sprintf(output, "ARG %s", x);
     }
     else if (code -> kind == CALL_i){
         char* result = trans_Operand(code -> u.call.result);
@@ -189,8 +190,10 @@ CodeList trans_Stmt(struct Node* Stmt){
     if (!strcmp(child -> name, "CompSt\0") && childsize(Stmt) == 1) return trans_CompSt(child);
     if (!strcmp(child -> name, "Exp\0") && childsize(Stmt) == 2) return trans_Exp(child, NULL); 
     if (!strcmp(child -> name, "RETURN\0") && childsize(Stmt) == 3){
+        //printf("%d\n", Stmt -> lineNum);
         Operand tmp = new_temp(VARIABLE);
         CodeList code1 = trans_Exp(child -> brother, tmp);
+        //printf("%d\n", Stmt -> lineNum);
         InterCode code = new_intercode(RET_i);
         code -> u.op = tmp;
         CodeList code2 = new_codelist(code);
@@ -357,7 +360,9 @@ CodeList trans_Exp(struct Node* node, Operand place){
 
         else if (!strcmp(node -> child -> brother -> name, "PLUS\0") || !strcmp(node -> child -> brother -> name, "MINUS\0") || !strcmp(node -> child -> brother -> name, "STAR\0") || !strcmp(node -> child -> brother -> name, "DIV\0")){
             Operand tmp1 = new_temp(VARIABLE), tmp2 = new_temp(VARIABLE);
+            //printf("1111\n");
             CodeList code1 = trans_Exp(node -> child, tmp1);
+            //printf("1111\n");
             CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
             CodeList code3 = NULL;
             if (place != NULL){
@@ -371,10 +376,14 @@ CodeList trans_Exp(struct Node* node, Operand place){
                 else if (!strcmp(node -> child -> brother -> name, "DIV\0")) code -> kind = DIV_i;
                 code3 = new_codelist(code);
             }
+            //printf("1111\n");
             return Join_intercode(Join_intercode(code1, code2), code3);
         }
 
-        else if (!strcmp(node -> child -> name, "LP\0")) return trans_Exp(node -> child -> brother, place);
+        else if (!strcmp(node -> child -> name, "LP\0")) {
+            //printf("111111\n");
+            return trans_Exp(node -> child -> brother, place);
+        }
 
         else if (!strcmp(node -> child -> brother -> name, "LP\0")){
             FieldList look = lookup_hash(node -> child -> TYPE_ID);
@@ -416,13 +425,19 @@ CodeList trans_Exp(struct Node* node, Operand place){
         }
     }
     if (childsize(node) == 4){
-        if (!strcmp(node -> child -> brother -> name, "LB\0")){
+        if (!strcmp(node -> child -> brother -> name, "LB\0")){ // EXP1 LB EXP2 RB   
+            //printf("%s\n", node -> child -> child -> TYPE_ID);
             Operand tmp1 = new_temp(ADDRESS), tmp2 = new_temp(VARIABLE), tmp3 = new_temp(VARIABLE);
-            CodeList code1 = trans_Exp(node -> child, tmp1);
-            CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
+            CodeList code1 = trans_Exp(node -> child, tmp1); // EXP1
+            //printf("%s\n", node -> child -> child -> TYPE_ID);
+            CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2); // EXP2
+            //printf("%d\n", node -> child -> brother -> brother -> child -> TYPE_INT);
             InterCode code = new_intercode(MUL_i);
             code -> u.binop.operand1 = tmp2;
+            //printf("11111\n");
             code -> u.binop.operand2 = new_constant(get_array_size(node));
+            printf("11111\n");
+            //printf("%d\n", get_array_size(node));
             code -> u.binop.result = tmp3;
             CodeList code3 = new_codelist(code);
             CodeList code4 = NULL;
