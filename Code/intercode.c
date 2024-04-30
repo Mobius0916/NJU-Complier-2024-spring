@@ -134,7 +134,7 @@ CodeList trans_Args(struct Node* Args, FieldList* arg_list){
     Operand tmp1 = new_temp(VARIABLE);
     if (Exp(Args -> child) -> kind != BASIC) tmp1 -> kind = ADDRESS;
     CodeList code1 = trans_Exp(Args -> child, tmp1);
-    FieldList tmp = (FieldList) malloc(sizeof(FieldList));
+    FieldList tmp = (FieldList) malloc(sizeof(struct FieldList_));
     tmp -> op = tmp1;
     tmp -> tail = *arg_list;
     *arg_list = tmp;
@@ -252,7 +252,7 @@ CodeList trans_Exp(struct Node* node, Operand place){
             CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
             CodeList code3 = NULL;
             if (place != NULL){
-                InterCode code = (InterCode) malloc(sizeof(InterCode)); 
+                InterCode code = (InterCode) malloc(sizeof(struct InterCode_)); 
                 code -> u.binop.operand1 = tmp1;
                 code -> u.binop.operand2 = tmp2;
                 code -> u.binop.result = place;
@@ -418,25 +418,16 @@ CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
             Operand tmp1 = new_temp(VARIABLE);
             Operand tmp2 = new_temp(VARIABLE);
             CodeList code1 = trans_Exp(node -> child, tmp1);
-            //printf("22222 %d\n", node -> lineNum);
             CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
-            //printf("22222 %d\n", node -> lineNum);
             char* relop = node -> child -> brother -> RELOP_;
             InterCode code = new_intercode(IF_GOTO_i);
-            //printf("22222 %d\n", node -> lineNum);
             code -> u.if_goto.relop = relop;
-            //printf("22222 %d\n", node -> lineNum);
             code -> u.if_goto.x = tmp1;
             code -> u.if_goto.y = tmp2;
             code -> u.if_goto.z = label_true;
-            printf("22222 %d\n", node -> lineNum);
             CodeList code3 = new_codelist(code);
-            printf("22222 %d\n", node -> lineNum);
             code = new_intercode(GOTO_i);
-            code -> u.op = label_false;
-            //printf("22222 %d\n", node -> lineNum);
             CodeList code4 = new_codelist(code);
-            //printf("22222 %d\n", node -> lineNum);
             return Join_intercode(Join_intercode(code1, code2), Join_intercode(code3, code4));
         }
     }
@@ -608,7 +599,7 @@ void inter_code(char* file, struct Node* root){
 }
 
 Operand new_label(){
-    Operand tmp = (Operand) malloc(sizeof(Operand));
+    Operand tmp = (Operand) malloc(sizeof(struct Operand_));
     tmp -> kind = LABEL;
     tmp -> u.label_id = label_num;
     label_num++;
@@ -616,7 +607,7 @@ Operand new_label(){
 }
 
 Operand new_temp(int kind){
-    Operand tmp = (Operand) malloc(sizeof(Operand));
+    Operand tmp = (Operand) malloc(sizeof(struct Operand_));
     tmp -> kind = kind;
     tmp -> u.variable_id = variable_num;
     variable_num++;
@@ -624,22 +615,20 @@ Operand new_temp(int kind){
 }
 
 Operand new_constant(int val){
-    Operand tmp = (Operand) malloc(sizeof(Operand));
+    Operand tmp = (Operand) malloc(sizeof(struct Operand_));
     tmp -> kind = CONSTANT;
     tmp -> u.val = val;
     return tmp;
 }
 
 InterCode new_intercode(int kind){
-    InterCode tmp = (InterCode) malloc(sizeof(InterCode));
+    InterCode tmp = (InterCode) malloc(sizeof(struct InterCode_));
     tmp -> kind = kind;
     return tmp;
 }
 
 CodeList new_codelist(InterCode code){
-    printf("33333333333 \n");
-    CodeList tmp = (CodeList) malloc(sizeof(CodeList));
-    printf("44444444444 \n");
+    CodeList tmp = (CodeList) malloc(sizeof(struct CodeList_));
     tmp -> code = code;
     tmp -> next = NULL;
     return tmp;
