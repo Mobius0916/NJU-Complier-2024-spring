@@ -10,10 +10,11 @@
 extern HashNode HashMap[HASHMAP_SIZE];
 
 CodeList InterCodes;
-int variable_num = 0, label_num = 0;
+int variable_num = 0, label_num = 1;
 
 void output(char* file){ // print three address code into file
     FILE* fp;
+    //printf("1111");
     if (file == NULL) { printf("Empty file!\n"); }
     else {
         fp = fopen(file, "w+");
@@ -30,7 +31,7 @@ void output(char* file){ // print three address code into file
         if (strlen(line) && file != NULL) fprintf(fp, "%s\n", line);
         else if (strlen(line)) printf("%s\n", line);
         tmp = tmp -> next;
-        printf("22222\n");
+        //printf("22222\n");
         //printf("1111\n");
     }
     //printf("1111\n");
@@ -129,7 +130,7 @@ char* trans_Operand(Operand op){
     assert(op != NULL);
     char* tmp = malloc(sizeof(char) * 100);
     if(op -> kind == CONSTANT) sprintf(tmp, "#%d", op -> u.val);
-    else if(op -> kind == LABEL) sprintf(tmp, "l%d", op -> u.label_id);
+    else if(op -> kind == LABEL) sprintf(tmp, "label%d", op -> u.label_id);
     else sprintf(tmp, "t%d", op -> u.variable_id);
     char* output = malloc(sizeof(char) * 101);
     strcpy(output, tmp);
@@ -535,6 +536,7 @@ CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
             code -> u.if_goto.z = label_true;
             CodeList code3 = new_codelist(code);
             code = new_intercode(GOTO_i);
+            code -> u.op = label_false;
             CodeList code4 = new_codelist(code);
             return Join_intercode(Join_intercode(code1, code2), Join_intercode(code3, code4));
         }

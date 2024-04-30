@@ -5,6 +5,8 @@
 #include <assert.h>
 #include "HashMap.h"
 #include "Node.h"
+#include "intercode.h"
+
 extern unsigned SemanticError;
 HashNode HashMap[HASHMAP_SIZE];
 
@@ -12,7 +14,42 @@ void init_hash(){
 	for(int i = 0; i < HASHMAP_SIZE; ++i){
 		HashMap[i] = NULL;
 	}
-	
+
+	FieldList read_ = (FieldList) malloc(sizeof(struct FieldList_)); 
+	read_ -> name = (char*) malloc(10 * sizeof(char));
+	strcpy(read_ -> name, "read");
+	read_ -> tail = NULL;
+	read_ -> type = (Type) malloc(sizeof(struct Type_));
+	read_ -> type -> kind = STRUCTURE; 
+	read_ -> type -> u.func.is_extern = 0;
+	read_ -> type -> u.func.argv = NULL;
+	Type tmp = (Type) malloc(sizeof(struct Type_));
+	tmp -> kind = BASIC;
+	tmp -> u.basic = 0;
+	read_ -> type -> u.func.ret = tmp;
+	insert_hash(read_);
+
+	FieldList write_ = (FieldList) malloc(sizeof(struct FieldList_)); 
+	write_ -> name = (char*) malloc(10 * sizeof(char));
+	strcpy(write_ -> name, "write");
+	write_ -> tail = NULL;
+	write_ -> type = (Type) malloc(sizeof(struct Type_));
+	write_ -> type -> kind = STRUCTURE; 
+	write_ -> type -> u.func.is_extern = 0;
+	FieldList argv = (FieldList) malloc(sizeof(struct FieldList_));
+	argv -> name =  (char*) malloc(10 * sizeof(char));
+	strcpy(argv -> name, "argvwrite");
+	Type Int = (Type) malloc(sizeof(struct Type_));
+	Int -> kind = BASIC;
+	Int -> u.basic = 0;
+	argv -> type = Int;
+	write_ -> type -> u.func.argv = argv;
+    //write_ -> type -> u.func.argv = NULL;
+	tmp = (Type) malloc(sizeof(struct Type_));
+	tmp -> kind = BASIC;
+	tmp -> u.basic = 0;
+	write_ -> type -> u.func.ret = tmp;
+	insert_hash(write_);
 }
 unsigned hash_pjw(char* name){
 	unsigned val = 0, i;

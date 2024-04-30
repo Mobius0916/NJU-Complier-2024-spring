@@ -18,7 +18,7 @@ struct Type_{
 	enum{BASIC, ARRAY, STRUCTURE, STRUCTTAG, FUNCTION, ERROR} kind;
 	union{
 		int basic;
-		struct { Type elem; int size; }array;
+		struct { Type elem; int size; } array;
 		FieldList structure;
 		FieldList structmember;
 		struct {Type ret; int argc; FieldList argv; unsigned is_extern; } func;
