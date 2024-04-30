@@ -874,13 +874,14 @@ YY_RULE_SETUP
 {
     struct Node* tmp = creatNode(NULL, "RELOP\0", 0);
     tmp -> is_token = 1;
+    strcpy(tmp -> RELOP, yytext);
     yylval = tmp;
     return RELOP;
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 90 "lexical.l"
+#line 91 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "PLUS\0", 0);
     tmp -> is_token = 1;
@@ -890,7 +891,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 96 "lexical.l"
+#line 97 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "MINUS\0", 0);
     tmp -> is_token = 1;
@@ -901,7 +902,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 103 "lexical.l"
+#line 104 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "STAR\0", 0);
     tmp -> is_token = 1;
@@ -911,7 +912,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 109 "lexical.l"
+#line 110 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "DIV\0", 0);
     tmp -> is_token = 1;
@@ -921,7 +922,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 115 "lexical.l"
+#line 116 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "AND\0", 0);
     tmp -> is_token = 1;
@@ -931,7 +932,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 121 "lexical.l"
+#line 122 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "OR\0", 0);
     tmp -> is_token = 1;
@@ -941,7 +942,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 127 "lexical.l"
+#line 128 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "DOT\0", 0);
     tmp -> is_token = 1;
@@ -951,7 +952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 133 "lexical.l"
+#line 134 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "NOT\0", 0);
     tmp -> is_token = 1;
@@ -961,7 +962,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 139 "lexical.l"
+#line 140 "lexical.l"
 {
     struct Node* tmp;
     if(!strcmp(yytext,"int\0")){
@@ -979,7 +980,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 153 "lexical.l"
+#line 154 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "LP\0", 0);
     tmp -> is_token = 1;
@@ -989,7 +990,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 159 "lexical.l"
+#line 160 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "RP\0", 0);
     tmp -> is_token = 1;
@@ -999,7 +1000,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 165 "lexical.l"
+#line 166 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "LB\0", 0);
     tmp -> is_token = 1;
@@ -1009,7 +1010,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 171 "lexical.l"
+#line 172 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "RB\0", 0);
     tmp -> is_token = 1;
@@ -1019,7 +1020,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 177 "lexical.l"
+#line 178 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "LC\0", 0);
     tmp -> is_token = 1;
@@ -1029,7 +1030,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 183 "lexical.l"
+#line 184 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "RC\0", 0);
     tmp -> is_token = 1;
@@ -1039,7 +1040,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 189 "lexical.l"
+#line 190 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "STRUCT\0", 0);
     tmp -> is_token = 1;
@@ -1049,7 +1050,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 195 "lexical.l"
+#line 196 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "RETURN\0", 0);
     tmp -> is_token = 1;
@@ -1059,7 +1060,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 201 "lexical.l"
+#line 202 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "IF\0", 0);
     tmp -> is_token = 1;
@@ -1069,7 +1070,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 207 "lexical.l"
+#line 208 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "ELSE\0", 0);
     tmp -> is_token = 1;
@@ -1079,7 +1080,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 213 "lexical.l"
+#line 214 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "WHILE\0", 0);
     tmp -> is_token = 1;
@@ -1089,7 +1090,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 219 "lexical.l"
+#line 220 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "INT\0", 0);
     tmp -> is_token = 1;
@@ -1100,7 +1101,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 226 "lexical.l"
+#line 227 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "FLOAT\0", 0);
     tmp -> is_token = 1;
@@ -1111,7 +1112,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 233 "lexical.l"
+#line 234 "lexical.l"
 {
     struct Node* tmp = creatNode(NULL, "ID\0", 0);
     tmp -> is_token = 1;
@@ -1122,22 +1123,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 240 "lexical.l"
+#line 241 "lexical.l"
 {}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 241 "lexical.l"
+#line 242 "lexical.l"
 {}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 242 "lexical.l"
+#line 243 "lexical.l"
 {}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 243 "lexical.l"
+#line 244 "lexical.l"
 {
     LexError += 1;
     printf("Error type A at Line %d: Mysterious charaters \'%s\'.\n", yylineno, yytext);
@@ -1145,10 +1146,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 247 "lexical.l"
+#line 248 "lexical.l"
 ECHO;
 	YY_BREAK
-#line 1152 "lex.yy.c"
+#line 1153 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2165,6 +2166,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 247 "lexical.l"
+#line 248 "lexical.l"
 
 

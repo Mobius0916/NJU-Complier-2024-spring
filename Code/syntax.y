@@ -167,8 +167,8 @@ int main(int argc, char** argv) {
 		    //printTreeFromRoot(root);	
 		}
         //PrintMap();
-		//if (argc >= 3) inter_code(argv[2], root);
-        //else inter_code(NULL, root);
+		if (argc >= 3) inter_code(argv[2], root);
+        else inter_code(NULL, root);
 	}
     return 0;
 

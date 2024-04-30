@@ -4,9 +4,11 @@ struct Position
     int a[500][20];
 };
 
-int func(int a);
+int func(int a){
+    
+}
 
-int func(struct Position p);
+
 
 int main(int b)
 {

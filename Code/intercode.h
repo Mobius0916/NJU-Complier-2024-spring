@@ -5,6 +5,7 @@
 
 typedef struct Operand_* Operand;
 typedef struct InterCode_* InterCode;
+typedef struct FieldList_* FieldList;
 typedef struct CodeList_* CodeList;
 
 struct Operand_{
@@ -25,6 +26,7 @@ struct InterCode_{
         struct { Operand operand1, operand2, result; } binop;
         struct { Operand x; int size; } dec;
         struct { Operand result; char* func; } call;
+        struct { Operand x, y, z; char* relop; } if_goto;
     }u;
 };
 
@@ -45,6 +47,8 @@ CodeList Join_intercode(CodeList code1, CodeList code2);
 CodeList trans_FunDec(struct Node* node);
 
 CodeList trans_Stmt(struct Node* Stmt);
+
+CodeList trans_Args(struct Node* Args, FieldList* argv);
 
 CodeList trans_Exp(struct Node* node, Operand place);
 

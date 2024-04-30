@@ -14,6 +14,7 @@ struct Node
         int TYPE_INT;
         float TYPE_FLOAT;
         char TYPE_ID[32];
+        char* RELOP;
     };
 };
 

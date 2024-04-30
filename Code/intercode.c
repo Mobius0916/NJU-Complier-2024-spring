@@ -121,26 +121,45 @@ CodeList trans_Stmt(struct Node* Stmt){
     }
 }
 
+CodeList trans_Args(struct Node* Args, FieldList* arg_list){
+    /*
+    Args → Exp COMMA Args
+    | Exp
+    */
+    Operand tmp1 = new_temp(VARIABLE);
+    if (Exp(Args -> child) -> kind != BASIC) tmp1 -> kind = ADDRESS;
+    CodeList code1 = trans_Exp(Args -> child, tmp1);
+    FieldList tmp = (FieldList) malloc(sizeof(FieldList));
+    tmp -> op = tmp1;
+    tmp -> tail = *arg_list;
+    *arg_list = tmp;
+    if (Args -> child -> brother == NULL) return code1;
+    else{
+        CodeList code2 = trans_Args(Args -> child -> brother -> brother, arg_list);
+        return Join_intercode(code1, code2);
+    }
+}
+
 CodeList trans_Exp(struct Node* node, Operand place){
     /*
-    Exp → Exp ASSIGNOP Exp
-    | Exp AND Exp
-    | Exp OR Exp
-    | Exp RELOP Exp
-    | Exp PLUS Exp
-    | Exp MINUS Exp
-    | Exp STAR Exp
-    | Exp DIV Exp
-    | LP Exp RP
-    | MINUS Exp
-    | NOT Exp
-    | ID LP Args RP
-    | ID LP RP
-    | Exp LB Exp RB
-    | Exp DOT ID
-    | ID
-    | INT
-    | FLOAT
+    Exp → y Exp ASSIGNOP Exp
+    x | Exp AND Exp
+    x | Exp OR Exp
+    x | Exp RELOP Exp
+    y | Exp PLUS Exp
+    y | Exp MINUS Exp
+    y | Exp STAR Exp
+    y | Exp DIV Exp
+    y | LP Exp RP
+    y | MINUS Exp
+    x | NOT Exp
+    y | ID LP Args RP
+    y | ID LP RP
+    y | Exp LB Exp RB
+    y | Exp DOT ID
+    y | ID
+    y | INT
+    y | FLOAT
     */
     if (childsize(node) == 1){
         if (place == NULL) return NULL;
@@ -165,6 +184,22 @@ CodeList trans_Exp(struct Node* node, Operand place){
             code -> u.assign.right = op;
             CodeList code1 = new_codelist(code);
             return code1;
+        }
+    }
+    
+    if (childsize(node) == 2){
+        if (!strcmp(node -> child -> name, "MINUS\0")){
+            Operand tmp1 = new_temp(VARIABLE);
+            CodeList code1 = trans_Exp(node -> child -> brother, tmp1);
+            CodeList code2 = NULL;
+            if (place != NULL){
+                InterCode code = new_intercode(MINUS_i);
+                code -> u.binop.operand1 = new_constant(0);
+                code -> u.binop.operand2 = tmp1;
+                code -> u.binop.result = place;
+                code2 = new_codelist(code);
+            }
+            return Join_intercode(code1, code2);
         }
     }
 
@@ -206,7 +241,7 @@ CodeList trans_Exp(struct Node* node, Operand place){
   
         }
 
-        if (!strcmp(node -> child -> brother -> name, "PLUS\0") || !strcmp(node -> child -> brother -> name, "MINUS\0") || !strcmp(node -> child -> brother -> name, "STAR\0") || !strcmp(node -> child -> brother -> name, "DIV\0")){
+        else if (!strcmp(node -> child -> brother -> name, "PLUS\0") || !strcmp(node -> child -> brother -> name, "MINUS\0") || !strcmp(node -> child -> brother -> name, "STAR\0") || !strcmp(node -> child -> brother -> name, "DIV\0")){
             Operand tmp1 = new_temp(VARIABLE), tmp2 = new_temp(VARIABLE);
             CodeList code1 = trans_Exp(node -> child, tmp1);
             CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
@@ -225,13 +260,26 @@ CodeList trans_Exp(struct Node* node, Operand place){
             return Join_intercode(Join_intercode(code1, code2), code3);
         }
 
-        if (!strcmp(node -> child -> name, "LP\0")) return trans_Exp(node -> child -> brother, place);
+        else if (!strcmp(node -> child -> name, "LP\0")) return trans_Exp(node -> child -> brother, place);
 
-        if (!strcmp(node -> child -> brother -> name, "LP\0")){
-
+        else if (!strcmp(node -> child -> brother -> name, "LP\0")){
+            FieldList look = lookup_hash(node -> child -> TYPE_ID);
+            if (!strcmp(look -> name, "read\0")){
+                if (place == NULL) return NULL;
+                InterCode code = new_intercode(READ);
+                code -> u.op = place;
+                return new_codelist(code);
+            }
+            else{
+                InterCode code = new_intercode(CALL_i);
+                if (place != NULL) code -> u.call.result = place; 
+                else code -> u.call.result = new_temp(VARIABLE);
+                code -> u.call.func = look -> name;
+                return new_codelist(code);
+            }
         }
 
-        if (!strcmp(node -> child -> brother -> name, "DOT\0")){
+        else if (!strcmp(node -> child -> brother -> name, "DOT\0")){
             if (place == NULL) return NULL;
             Type type = Exp(node -> child);
             Operand tmp1 = new_temp(ADDRESS);
@@ -281,11 +329,115 @@ CodeList trans_Exp(struct Node* node, Operand place){
             }
             return Join_intercode(Join_intercode(code1, code2), Join_intercode(code3, code4));
         }
+
+        else if (!strcmp(node -> child -> brother -> brother -> name, "Args\0")){
+            FieldList look = lookup_hash(node -> child -> TYPE_ID);
+            FieldList arg_list = NULL;
+            CodeList code1 = trans_Args(node -> child -> brother -> brother, &arg_list);
+            if (!strcmp(look -> name, "write\0")){
+                InterCode code = new_intercode(WRITE);
+                code -> u.op = arg_list -> op;
+                CodeList code2 = new_codelist(code);
+                CodeList code3 = NULL;
+                if (place != NULL){
+                    code = new_intercode(ASSIGN_i);
+                    code -> u.assign.left = place;
+                    code -> u.assign.right = new_constant(0);
+                    code3 = new_codelist(code);
+                } 
+                return Join_intercode(code1, Join_intercode(code2, code3));
+            }
+            else{
+                CodeList code2 = NULL;
+                while(arg_list != NULL){
+                    InterCode code = new_intercode(ARG_i);
+                    code -> u.op = arg_list -> op;
+                    code2 = Join_intercode(code2, new_codelist(code));
+                    arg_list = arg_list -> tail;
+                }
+                InterCode code = new_intercode(CALL_i);
+                if (place != NULL) code -> u.call.result = place;
+                else code -> u.call.result = new_temp(VARIABLE);
+                code -> u.call.func = look -> name;
+                CodeList code3 = new_codelist(code);
+                return Join_intercode(code1, Join_intercode(code2, code3));
+            }
+        }
     }
 }
 
 CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
-
+    /*
+    Exp → x Exp ASSIGNOP Exp
+    y  | Exp AND Exp
+    y  | Exp OR Exp
+      | Exp RELOP Exp
+    x | Exp PLUS Exp
+    x | Exp MINUS Exp
+    x | Exp STAR Exp
+    x | Exp DIV Exp
+    x | LP Exp RP
+    x | MINUS Exp
+    y | NOT Exp
+    x | ID LP Args RP
+    x | ID LP RP
+    x | Exp LB Exp RB
+    x | Exp DOT ID
+    x | ID
+    x | INT
+    x | FLOAT
+    */
+    if (childsize(node) == 2) return trans_Cond(node -> child -> brother, label_false, label_true);
+    if (childsize(node) == 3){
+        if (!strcmp(node -> child -> brother -> name, "AND\0")){
+            Operand label1 = new_label();
+            CodeList code1 = trans_Cond(node -> child, label1, label_false);
+            CodeList code2 = trans_Cond(node -> child -> brother -> brother, label_true, label_false);
+            InterCode code = new_intercode(LABEL_i);
+            code -> u.op = label1;
+            CodeList codeLABEL = new_codelist(code);
+            return Join_intercode(code1, Join_intercode(codeLABEL, code2));
+        }
+        else if (!strcmp(node -> child -> brother -> name, "OR\0")){
+            Operand label1 = new_label();
+            CodeList code1 = trans_Cond(node -> child, label_true, label1);
+            CodeList code2 = trans_Cond(node -> child -> brother -> brother, label_true, label_false);
+            InterCode code = new_intercode(LABEL_i);
+            code -> u.op = label1;
+            CodeList codeLABEL = new_codelist(code);
+            return Join_intercode(code1, Join_intercode(codeLABEL, code2));
+        }
+        else if (!strcmp(node -> child -> brother -> name, "RELOP\0")){
+            Operand tmp1 = new_temp(VARIABLE);
+            Operand tmp2 = new_temp(VARIABLE);
+            CodeList code1 = trans_Exp(node -> child, tmp1);
+            CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
+            char* relop = node -> child -> brother -> RELOP;
+            InterCode code = new_intercode(IF_GOTO_i);
+            code -> u.if_goto.relop = relop;
+            code -> u.if_goto.x = tmp1;
+            code -> u.if_goto.y = tmp2;
+            code -> u.if_goto.z = label_true;
+            CodeList code3 = new_codelist(code);
+            code = new_intercode(GOTO_i);
+            code -> u.op = label_false;
+            CodeList code4 = new_codelist(code);
+            return Join_intercode(Join_intercode(code1, code2), Join_intercode(code3, code4));
+        }
+    }
+    Operand tmp1 = new_temp(VARIABLE);
+    CodeList code1 = trans_Exp(node, tmp1);
+    InterCode code = new_intercode(IF_GOTO_i);
+    code -> u.if_goto.relop = malloc(3);
+    strcpy(code -> u.if_goto.relop, "!=");
+    code -> u.if_goto.x = tmp1;
+    code -> u.if_goto.y = new_constant(0);
+    code -> u.if_goto.z = label_true;
+    CodeList code2 = new_codelist(code);
+    code = new_intercode(GOTO_i);
+    code -> u.op = label_false;
+    CodeList code3 = new_codelist(code);
+    return Join_intercode(code1, Join_intercode(code2, code3));
 }
 
 CodeList trans_Dec(struct Node* Dec){
@@ -349,8 +501,11 @@ CodeList trans_DefList(struct Node* DefList){
     CodeList code = NULL;
     while(DefList != NULL){
         struct Node* Def = DefList -> child;
-        code = Join_intercode(code, trans_Def(Def));
-        if (Def != NULL) DefList = Def -> brother;
+        if (Def != NULL){
+            code = Join_intercode(code, trans_Def(Def));
+            DefList = Def -> brother;
+        }
+        else break;
     }
     return code;
 }
@@ -363,9 +518,13 @@ CodeList trans_StmtList(struct Node* StmtList){
     CodeList code = NULL;
     while (StmtList != NULL){
         struct Node* Stmt = StmtList -> child;
-        code = Join_intercode(code, trans_Stmt(Stmt));
-        if (Stmt != NULL) StmtList = Stmt -> brother;
+        if (Stmt != NULL) {
+            code = Join_intercode(code, trans_Stmt(Stmt));
+            StmtList = Stmt -> brother;
+        }
+        else break;
     }
+    //printf("11111\n");
     return code;
 }
 
@@ -374,8 +533,11 @@ CodeList trans_CompSt(struct Node* CompSt){
     CompSt → LC DefList StmtList RC
     */
     assert(CompSt -> child != NULL);
+    //if (CompSt -> child == NULL) printf("111111\n");
+    //printf("111111 %d\n", CompSt -> lineNum);
     struct Node* child = CompSt -> child -> brother;
     CodeList code1 = trans_DefList(child);
+    //printf("111111\n");
     CodeList code2 = trans_StmtList(child -> brother);
     return Join_intercode(code1, code2);
 }
@@ -390,8 +552,10 @@ void trans_ExtDef(struct Node* ExtDef){
     struct Node* child = ExtDef -> child -> brother;
     if (!strcmp(child -> name, "FunDec\0") && childsize(ExtDef) == 3){
         struct Node* brother = child -> brother;
+        //printf("%s , %s,  %d\n", child -> name, brother -> name, child -> lineNum);
         Join_intercode(trans_FunDec(child), trans_CompSt(brother));
     }
+    //printf("11111\n");
 }   
 
 void trans_ExtDefList(struct Node* ExtDefList){
@@ -401,8 +565,11 @@ void trans_ExtDefList(struct Node* ExtDefList){
     */
     while (ExtDefList != NULL){
         struct Node* ExtDef = ExtDefList -> child;
-        trans_ExtDef(ExtDef);
-        if (ExtDefList -> child != NULL) ExtDefList = ExtDefList -> child -> brother;
+        if (ExtDefList -> child != NULL) {
+            trans_ExtDef(ExtDef);
+            ExtDefList = ExtDefList -> child -> brother;
+        }
+        else break;
     }
 }
 
@@ -425,7 +592,7 @@ void build_inter_code(struct Node* root){
 void inter_code(char* file, struct Node* root){
     //build_inter_code(root);
     trans_Program(root);
-    output(file);
+    //output(file);
 }
 
 Operand new_label(){

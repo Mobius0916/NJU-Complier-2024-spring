@@ -144,7 +144,6 @@ void printhashNode(FieldList Node){
 		printf("function: %s, argc:%d, is_extern:%d, argv:\n",Node -> name, Node -> type -> u.func.argc, Node -> type -> u.func.is_extern);
 		FieldList tmp = Node -> type -> u.func.argv;
 		if(tmp != NULL){
-			//printf("1111");
 			printf("Function %s:\n", Node -> name);
 			printSpace(1);
 			printhashNode(tmp);
@@ -153,7 +152,6 @@ void printhashNode(FieldList Node){
 				printSpace(1);
 				printhashNode(tmp);
 			}
-			//printf("22222");
 		}
 	}
 }	

@@ -84,6 +84,7 @@ WHILE while
 {RELOP} {
     struct Node* tmp = creatNode(NULL, "RELOP\0", 0);
     tmp -> is_token = 1;
+    strcpy(tmp -> RELOP, yytext);
     yylval = tmp;
     return RELOP;
 }
