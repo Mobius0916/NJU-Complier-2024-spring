@@ -11,6 +11,6 @@ int func(int a)
 
 int main(int b)
 {
-    int c = 5;
-    if (b > 2) func(c);
+    int d[20];
+    if (b > 2) b = func(b);
 }
