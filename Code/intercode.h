@@ -40,8 +40,6 @@ char* trans_InterCode(InterCode code);
 
 char* trans_Operand(Operand op);
 
-void Add_intercode(CodeList code);
-
 CodeList Join_intercode(CodeList code1, CodeList code2);
 
 CodeList trans_FunDec(struct Node* node);

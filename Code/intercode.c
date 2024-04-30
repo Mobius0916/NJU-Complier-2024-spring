@@ -32,19 +32,13 @@ char* trans_Operand(Operand op){
     return output;
 }
 
-void Add_intercode(CodeList code){ // Add Code to the tail of  [intercodes_head -> intercodes_tail]
-    if (code == NULL) return;
-    while(InterCodes != NULL) InterCodes = InterCodes -> next;
-    InterCodes = code;
-}
-
-CodeList Join_intercode(CodeList code1, CodeList code2){
+CodeList Join_intercode(CodeList code1, CodeList code2){ // Link code2 to the end of code1 and return the linked list 
+    if (code1 == NULL) return code2; 
     CodeList tmp = code1;
-    while(tmp != NULL) tmp = tmp -> next;
-    tmp = code2;
-    return code1;
+    while (tmp -> next != NULL) tmp = tmp -> next;
+    tmp -> next = code2; 
+    return code1; 
 }
-
 
 CodeList trans_FunDec(struct Node* node){
     /*
@@ -53,10 +47,11 @@ CodeList trans_FunDec(struct Node* node){
     */
     struct Node* child = node -> child;
     FieldList look = lookup_hash(child -> TYPE_ID);
-    printf("%s\n", child -> TYPE_ID);
+    //printf("%s\n", child -> TYPE_ID);
     assert(look != NULL && look -> type -> kind == FUNCTION);
     //printf("%d\n", look -> type -> kind);
     FieldList paras = look -> type -> u.func.argv;
+    //printf("%s\n", paras -> name);
     InterCode tmp = new_intercode(FUNC_i);
     tmp -> u.func = child -> TYPE_ID;
     CodeList code = new_codelist(tmp);
@@ -71,6 +66,8 @@ CodeList trans_FunDec(struct Node* node){
         code = Join_intercode(code, new_codelist(para));
         paras = paras -> tail;
     }
+    //printf("%d\n", (code == NULL));
+    return code;
 }
 
 CodeList trans_Stmt(struct Node* Stmt){
@@ -85,7 +82,7 @@ CodeList trans_Stmt(struct Node* Stmt){
     //printf("11111 %d\n", Stmt -> lineNum);
     struct Node* child = Stmt -> child;
     if (!strcmp(child -> name, "CompSt\0") && childsize(Stmt) == 1) return trans_CompSt(child);
-    if (!strcmp(child -> name, "Exp\0") && childsize(Stmt) == 2) return trans_Exp(child, NULL);
+    if (!strcmp(child -> name, "Exp\0") && childsize(Stmt) == 2) return trans_Exp(child, NULL); 
     if (!strcmp(child -> name, "RETURN\0") && childsize(Stmt) == 3){
         Operand tmp = new_temp(VARIABLE);
         CodeList code1 = trans_Exp(child -> brother, tmp);
@@ -95,14 +92,19 @@ CodeList trans_Stmt(struct Node* Stmt){
         return Join_intercode(code1, code2);
     }
     if (!strcmp(child -> name, "IF\0") && childsize(Stmt) == 5){
+        //printf("%d\n", Stmt -> lineNum);
         Operand tmp1 = new_label(), tmp2 = new_label();
         //printf("11111 %d\n", Stmt -> lineNum);
         CodeList code1 = trans_Cond(child -> brother -> brother, tmp1, tmp2);
         //printf("11111 %d\n", Stmt -> lineNum);
         CodeList code2 = trans_Stmt(child -> brother -> brother -> brother -> brother);
+        //printf("%d\n", (code2 == NULL));
         InterCode l1 = new_intercode(LABEL_i), l2 = new_intercode(LABEL_i);
         l1 -> u.op = tmp1, l2 -> u.op = tmp2;
         CodeList L1 = new_codelist(l1), L2 = new_codelist(l2);
+        //CodeList tmp = Join_intercode(Join_intercode(code1, L1), Join_intercode(code2, L2));
+        //printf("%d - -\n", (tmp == NULL));
+        //printf("%d\n", (Join_intercode(Join_intercode(code1, L1), Join_intercode(code2, L2)) == NULL) );
         return Join_intercode(Join_intercode(code1, L1), Join_intercode(code2, L2));
     }
     if (!strcmp(child -> name, "IF\0") && childsize(Stmt) == 7){
@@ -454,14 +456,17 @@ CodeList trans_Dec(struct Node* Dec){
     struct Node* VarDec = Dec -> child;
     if (VarDec -> brother != NULL && !strcmp(VarDec -> brother -> name, "ASSIGNOP\0")){
         if (!strcmp(VarDec -> child -> name, "ID\0")){
+            //printf("%d\n", Dec -> lineNum);
             Operand op = look_up_hash(VarDec -> child);
             return trans_Exp(Dec -> child -> brother -> brother, op);
         }
     }
     else{ //DEC   array or structure  (9)
         struct Node* ID = get_VarDec_ID(VarDec);
+        //printf("%s\n", ID -> TYPE_ID);
         FieldList look = lookup_hash(ID -> TYPE_ID);
         if (look -> type -> kind == ARRAY || look -> type -> kind == STRUCTURE){
+            //printf("%s\n", ID -> TYPE_ID);
             Operand op = new_temp(ARR_STRU);
             InterCode code = new_intercode(DEC_i);
             int size = getsize(look -> type);
@@ -470,6 +475,7 @@ CodeList trans_Dec(struct Node* Dec){
             look -> op = op;
             return new_codelist(code);
         } 
+        else return NULL;
     }
 }
 
@@ -507,11 +513,13 @@ CodeList trans_DefList(struct Node* DefList){
     while(DefList != NULL){
         struct Node* Def = DefList -> child;
         if (Def != NULL){
+            //printf("11111\n");
             code = Join_intercode(code, trans_Def(Def));
             DefList = Def -> brother;
         }
         else break;
     }
+    //printf("%d\n", (code == NULL));
     return code;
 }
 
@@ -521,14 +529,18 @@ CodeList trans_StmtList(struct Node* StmtList){
     | e
     */
     CodeList code = NULL;
+    //printf("11111 %d\n", StmtList -> lineNum);
     while (StmtList != NULL){
         struct Node* Stmt = StmtList -> child;
         if (Stmt != NULL) {
+            //printf("%d\n", (trans_Stmt(Stmt) == NULL));
             code = Join_intercode(code, trans_Stmt(Stmt));
+            //printf("%d\n", (code == NULL));
             StmtList = Stmt -> brother;
         }
         else break;
     }
+    //printf("%d\n", (code == NULL));
     return code;
 }
 
@@ -543,6 +555,7 @@ CodeList trans_CompSt(struct Node* CompSt){
     CodeList code1 = trans_DefList(child);
     //printf("11111\n");
     CodeList code2 = trans_StmtList(child -> brother);
+    //printf("%d\n", (Join_intercode(code1, code2) == NULL));
     return Join_intercode(code1, code2);
 }
 
@@ -554,6 +567,7 @@ CodeList trans_ExtDef(struct Node* ExtDef){
     */
     assert(ExtDef -> child != NULL);
     //printf("11111\n");
+    //printf("%d\n", ExtDef -> lineNum);
     struct Node* child = ExtDef -> child -> brother;
     if (childsize(ExtDef) == 3 && !strcmp(child -> name, "FunDec\0")){
         struct Node* brother = child -> brother;
@@ -570,6 +584,7 @@ CodeList trans_ExtDefList(struct Node* ExtDefList){
     */
     CodeList code = NULL;
     //printf("11111\n");
+    //printf("%d\n", (trans_ExtDef(ExtDefList -> child) == NULL));
     while (ExtDefList != NULL){
         struct Node* ExtDef = ExtDefList -> child;
         if (ExtDefList -> child != NULL) {
@@ -587,8 +602,9 @@ CodeList trans_Program(struct Node* Program){
     */
     //printf("11111\n");
     struct Node* ExtDefList = Program -> child;
+    //printf("%d\n", (trans_ExtDefList(ExtDefList) == NULL));
     if (ExtDefList != NULL) return trans_ExtDefList(ExtDefList);
-    else { printf("11111\n"); return NULL; }
+    else return NULL; 
 }
 
 void inter_code(char* file, struct Node* root){

@@ -4,12 +4,13 @@ struct Position
     int a[500][20];
 };
 
-int func(int a){
-    
+int func(int a)
+{
+    return a;
 }
 
 int main(int b)
 {
-    int c = 3;
+    int c = 5;
     if (b > 2) func(c);
 }
