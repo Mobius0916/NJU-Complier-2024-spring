@@ -524,7 +524,6 @@ CodeList trans_StmtList(struct Node* StmtList){
         }
         else break;
     }
-    //printf("11111\n");
     return code;
 }
 
@@ -533,16 +532,13 @@ CodeList trans_CompSt(struct Node* CompSt){
     CompSt → LC DefList StmtList RC
     */
     assert(CompSt -> child != NULL);
-    //if (CompSt -> child == NULL) printf("111111\n");
-    //printf("111111 %d\n", CompSt -> lineNum);
     struct Node* child = CompSt -> child -> brother;
     CodeList code1 = trans_DefList(child);
-    //printf("111111\n");
     CodeList code2 = trans_StmtList(child -> brother);
     return Join_intercode(code1, code2);
 }
 
-void trans_ExtDef(struct Node* ExtDef){
+CodeList trans_ExtDef(struct Node* ExtDef){
     /*
     ExtDef → Specifier ExtDecList SEMI
     | Specifier SEMI
@@ -552,25 +548,26 @@ void trans_ExtDef(struct Node* ExtDef){
     struct Node* child = ExtDef -> child -> brother;
     if (!strcmp(child -> name, "FunDec\0") && childsize(ExtDef) == 3){
         struct Node* brother = child -> brother;
-        //printf("%s , %s,  %d\n", child -> name, brother -> name, child -> lineNum);
-        Join_intercode(trans_FunDec(child), trans_CompSt(brother));
+        return Join_intercode(trans_FunDec(child), trans_CompSt(brother));
     }
-    //printf("11111\n");
+    return NULL;
 }   
 
-void trans_ExtDefList(struct Node* ExtDefList){
+CodeList trans_ExtDefList(struct Node* ExtDefList){
     /*
     ExtDefList → ExtDef ExtDefList
     | e
     */
+    CodeList code = NULL;
     while (ExtDefList != NULL){
         struct Node* ExtDef = ExtDefList -> child;
         if (ExtDefList -> child != NULL) {
-            trans_ExtDef(ExtDef);
+            code = Join_intercode(code, trans_ExtDef(ExtDef));
             ExtDefList = ExtDefList -> child -> brother;
         }
         else break;
     }
+    return code;
 }
 
 void trans_Program(struct Node* Program){

@@ -66,11 +66,9 @@ CodeList trans_StmtList(struct Node* StmtList);
 
 CodeList trans_CompSt(struct Node* node);
 
-void trans_ExtDecList(struct Node* node);
+CodeList trans_ExtDef(struct Node* node);
 
-void trans_ExtDef(struct Node* node);
-
-void trans_ExtDefList(struct Node* node);
+CodeList trans_ExtDefList(struct Node* node);
 
 void trans_Program(struct Node* node);
 
