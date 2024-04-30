@@ -70,9 +70,7 @@ CodeList trans_ExtDef(struct Node* node);
 
 CodeList trans_ExtDefList(struct Node* node);
 
-void trans_Program(struct Node* node);
-
-void build_inter_code(struct Node* root);
+CodeList trans_Program(struct Node* node);
 
 void inter_code(char* file, struct Node* root);
 

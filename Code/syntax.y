@@ -152,23 +152,27 @@ Args : Exp COMMA Args { $$ = creatNode($1, "Args\0", @$.first_line); $1 -> broth
 int yylex();
 
 int main(int argc, char** argv) {
+    //printf("11111\n");
     if (argc <= 1) return 1;
     FILE* f = fopen(argv[1], "r");
     if (!f){
         perror(argv[1]);
 	    return 1;
     }
+    LexError = 0, SyntaxError = 0;
+    printf("Parse begin!\n");
     yyrestart(f);
     yyparse();
+    printf("Parse end!\n");
     if(LexError == 0 && SyntaxError == 0){
+        printf("Semantic anyasis begin !\n");
 	    semantic_anyasis(root);
-	        //PrintMap();
-	    if(SemanticError == 0){
-		    //printTreeFromRoot(root);	
-		}
-        //PrintMap();
+        printf("Semantic anyasis end!\n");
+	    //PrintMap();
+        printf("Build intercodes begin !\n");
 		if (argc >= 3) inter_code(argv[2], root);
         else inter_code(NULL, root);
+        printf("Build intercodes end !\n");
 	}
     return 0;
 

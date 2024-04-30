@@ -8,9 +8,8 @@ int func(int a){
     
 }
 
-
-
 int main(int b)
 {
-
+    int c = 3;
+    if (b > 2) func(c);
 }

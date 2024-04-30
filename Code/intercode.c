@@ -53,7 +53,9 @@ CodeList trans_FunDec(struct Node* node){
     */
     struct Node* child = node -> child;
     FieldList look = lookup_hash(child -> TYPE_ID);
+    printf("%s\n", child -> TYPE_ID);
     assert(look != NULL && look -> type -> kind == FUNCTION);
+    //printf("%d\n", look -> type -> kind);
     FieldList paras = look -> type -> u.func.argv;
     InterCode tmp = new_intercode(FUNC_i);
     tmp -> u.func = child -> TYPE_ID;
@@ -80,6 +82,7 @@ CodeList trans_Stmt(struct Node* Stmt){
     | IF LP Exp RP Stmt ELSE Stmt
     | WHILE LP Exp RP Stmt
     */
+    //printf("11111 %d\n", Stmt -> lineNum);
     struct Node* child = Stmt -> child;
     if (!strcmp(child -> name, "CompSt\0") && childsize(Stmt) == 1) return trans_CompSt(child);
     if (!strcmp(child -> name, "Exp\0") && childsize(Stmt) == 2) return trans_Exp(child, NULL);
@@ -93,7 +96,9 @@ CodeList trans_Stmt(struct Node* Stmt){
     }
     if (!strcmp(child -> name, "IF\0") && childsize(Stmt) == 5){
         Operand tmp1 = new_label(), tmp2 = new_label();
+        //printf("11111 %d\n", Stmt -> lineNum);
         CodeList code1 = trans_Cond(child -> brother -> brother, tmp1, tmp2);
+        //printf("11111 %d\n", Stmt -> lineNum);
         CodeList code2 = trans_Stmt(child -> brother -> brother -> brother -> brother);
         InterCode l1 = new_intercode(LABEL_i), l2 = new_intercode(LABEL_i);
         l1 -> u.op = tmp1, l2 -> u.op = tmp2;
@@ -387,6 +392,7 @@ CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
     x | INT
     x | FLOAT
     */
+    //printf("11111 %d\n", node -> lineNum);
     if (childsize(node) == 2) return trans_Cond(node -> child -> brother, label_false, label_true);
     if (childsize(node) == 3){
         if (!strcmp(node -> child -> brother -> name, "AND\0")){
@@ -408,27 +414,35 @@ CodeList trans_Cond(struct Node* node, Operand label_true, Operand label_false){
             return Join_intercode(code1, Join_intercode(codeLABEL, code2));
         }
         else if (!strcmp(node -> child -> brother -> name, "RELOP\0")){
+            //printf("22222 %d\n", node -> lineNum);
             Operand tmp1 = new_temp(VARIABLE);
             Operand tmp2 = new_temp(VARIABLE);
             CodeList code1 = trans_Exp(node -> child, tmp1);
+            //printf("22222 %d\n", node -> lineNum);
             CodeList code2 = trans_Exp(node -> child -> brother -> brother, tmp2);
-            char* relop = node -> child -> brother -> RELOP;
+            //printf("22222 %d\n", node -> lineNum);
+            char* relop = node -> child -> brother -> RELOP_;
             InterCode code = new_intercode(IF_GOTO_i);
+            //printf("22222 %d\n", node -> lineNum);
             code -> u.if_goto.relop = relop;
+            //printf("22222 %d\n", node -> lineNum);
             code -> u.if_goto.x = tmp1;
             code -> u.if_goto.y = tmp2;
             code -> u.if_goto.z = label_true;
+            printf("22222 %d\n", node -> lineNum);
             CodeList code3 = new_codelist(code);
+            printf("22222 %d\n", node -> lineNum);
             code = new_intercode(GOTO_i);
             code -> u.op = label_false;
+            //printf("22222 %d\n", node -> lineNum);
             CodeList code4 = new_codelist(code);
+            //printf("22222 %d\n", node -> lineNum);
             return Join_intercode(Join_intercode(code1, code2), Join_intercode(code3, code4));
         }
     }
     Operand tmp1 = new_temp(VARIABLE);
     CodeList code1 = trans_Exp(node, tmp1);
     InterCode code = new_intercode(IF_GOTO_i);
-    code -> u.if_goto.relop = malloc(3);
     strcpy(code -> u.if_goto.relop, "!=");
     code -> u.if_goto.x = tmp1;
     code -> u.if_goto.y = new_constant(0);
@@ -532,8 +546,11 @@ CodeList trans_CompSt(struct Node* CompSt){
     CompSt → LC DefList StmtList RC
     */
     assert(CompSt -> child != NULL);
+    //printf("11111\n");
     struct Node* child = CompSt -> child -> brother;
+    //printf("11111 %d\n", CompSt -> lineNum);
     CodeList code1 = trans_DefList(child);
+    //printf("11111\n");
     CodeList code2 = trans_StmtList(child -> brother);
     return Join_intercode(code1, code2);
 }
@@ -545,9 +562,11 @@ CodeList trans_ExtDef(struct Node* ExtDef){
     | Specifier FunDec CompSt
     */
     assert(ExtDef -> child != NULL);
+    //printf("11111\n");
     struct Node* child = ExtDef -> child -> brother;
-    if (!strcmp(child -> name, "FunDec\0") && childsize(ExtDef) == 3){
+    if (childsize(ExtDef) == 3 && !strcmp(child -> name, "FunDec\0")){
         struct Node* brother = child -> brother;
+        //printf("%d\n", child -> lineNum);
         return Join_intercode(trans_FunDec(child), trans_CompSt(brother));
     }
     return NULL;
@@ -559,6 +578,7 @@ CodeList trans_ExtDefList(struct Node* ExtDefList){
     | e
     */
     CodeList code = NULL;
+    //printf("11111\n");
     while (ExtDefList != NULL){
         struct Node* ExtDef = ExtDefList -> child;
         if (ExtDefList -> child != NULL) {
@@ -570,26 +590,21 @@ CodeList trans_ExtDefList(struct Node* ExtDefList){
     return code;
 }
 
-void trans_Program(struct Node* Program){
+CodeList trans_Program(struct Node* Program){
     /*
     Program → ExtDefList
     */
+    //printf("11111\n");
     struct Node* ExtDefList = Program -> child;
-    if (ExtDefList != NULL) trans_ExtDefList(ExtDefList);
-}
-
-void build_inter_code(struct Node* root){ 
-    if (root == NULL) return;
-    //if (!strcmp(root -> name, "ExtDef")) Add_intercode(trans_ExtDef(root));
-    //struct Node* child = node -> child;
-    //for (; child != NULL; child = child -> brother) build_inter_code(child);
-
+    if (ExtDefList != NULL) return trans_ExtDefList(ExtDefList);
+    else { printf("11111\n"); return NULL; }
 }
 
 void inter_code(char* file, struct Node* root){
     //build_inter_code(root);
-    trans_Program(root);
-    //output(file);
+    //printf("11111\n");
+    InterCodes = trans_Program(root);
+    output(file);
 }
 
 Operand new_label(){
@@ -622,7 +637,9 @@ InterCode new_intercode(int kind){
 }
 
 CodeList new_codelist(InterCode code){
+    printf("33333333333 \n");
     CodeList tmp = (CodeList) malloc(sizeof(CodeList));
+    printf("44444444444 \n");
     tmp -> code = code;
     tmp -> next = NULL;
     return tmp;
@@ -653,17 +670,22 @@ struct Node* get_VarDec_ID(struct Node* VarDec){
 }
 
 void output(char* file){ // print three address code into file
-    FILE* fp = fopen(file, "w+");
-    if (file == NULL) { printf("Empty file!\n"); perror(file); return; }
-    if (!fp) { printf("No avaiable file!\n"); perror(file); return; }
+    FILE* fp;
+    if (file == NULL) { printf("Empty file!\n"); }
+    else {
+        fp = fopen(file, "w+");
+        if (!fp) { printf("No avaiable file!\n"); perror(file); return; }
+    }
 
     CodeList tmp = InterCodes;
+    printf("InterCodes NULL? %d\n", (tmp == NULL));
     while(tmp != NULL){
         char* line = trans_InterCode(tmp -> code);
-        if (strlen(line)) fprintf(fp, "%s\n", line);
+        if (strlen(line) && file != NULL) fprintf(fp, "%s\n", line);
+        else if (strlen(line)) printf("%s\n", line);
         tmp = tmp -> next;
     }
-    fclose(fp);
+    if (file != NULL) fclose(fp);
 }
 
 
