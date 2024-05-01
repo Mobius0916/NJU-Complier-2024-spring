@@ -133,17 +133,17 @@ CodeList Join_intercode(CodeList code1, CodeList code2){ // Link code2 to the en
     return code1; 
 }
 
-CodeList trans_FunDec(struct Node* node){
+CodeList trans_FunDec(struct Node* FuncDec){
     /*
     FunDec → ID LP VarList RP
     | ID LP RP
     */
-    struct Node* child = node -> child;
-    FieldList look = lookup_hash(child -> TYPE_ID);
+    struct Node* ID = FuncDec -> child;
+    FieldList look = lookup_hash(ID -> TYPE_ID);
     assert(look != NULL && look -> type -> kind == FUNCTION);
     FieldList paras = look -> type -> u.func.argv;
     InterCode tmp = new_intercode(FUNC_i);
-    tmp -> u.func = child -> TYPE_ID;
+    tmp -> u.func = ID-> TYPE_ID;
     CodeList code = new_codelist(tmp);
     while(paras != NULL){
         InterCode para = new_intercode(PARAM_i);
