@@ -21,9 +21,10 @@ void init_hash(){
 	strcpy(read_ -> name, "read");
 	read_ -> tail = NULL;
 	read_ -> type = (Type) malloc(sizeof(struct Type_));
-	read_ -> type -> kind = STRUCTURE; 
+	read_ -> type -> kind = FUNCTION; 
 	read_ -> type -> u.func.is_extern = 0;
 	read_ -> type -> u.func.argv = NULL;
+	read_ -> type -> u.func.argc = 0;
 	Type tmp = (Type) malloc(sizeof(struct Type_));
 	tmp -> kind = BASIC;
 	tmp -> u.basic = 0;
@@ -35,7 +36,7 @@ void init_hash(){
 	strcpy(write_ -> name, "write");
 	write_ -> tail = NULL;
 	write_ -> type = (Type) malloc(sizeof(struct Type_));
-	write_ -> type -> kind = STRUCTURE; 
+	write_ -> type -> kind = FUNCTION; 
 	write_ -> type -> u.func.is_extern = 0;
 	FieldList argv = (FieldList) malloc(sizeof(struct FieldList_));
 	argv -> name =  (char*) malloc(10 * sizeof(char));
@@ -45,6 +46,7 @@ void init_hash(){
 	Int -> u.basic = 0;
 	argv -> type = Int;
 	write_ -> type -> u.func.argv = argv;
+	write_ -> type -> u.func.argc = 1;
     //write_ -> type -> u.func.argv = NULL;
 	tmp = (Type) malloc(sizeof(struct Type_));
 	tmp -> kind = BASIC;

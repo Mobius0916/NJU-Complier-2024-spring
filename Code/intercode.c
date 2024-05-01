@@ -14,7 +14,6 @@ int variable_num = 0, label_num = 1;
 
 void output(char* file){ // print three address code into file
     FILE* fp;
-    //printf("1111");
     if (file == NULL) { printf("Empty file!\n"); }
     else {
         fp = fopen(file, "w+");
@@ -22,19 +21,12 @@ void output(char* file){ // print three address code into file
     }
 
     CodeList tmp = InterCodes;
-    //printf("InterCodes NULL? %d\n", (tmp == NULL));
     while(tmp != NULL){
-        //printf("33333\n");
-        //printf("%d\n", tmp -> code -> kind);
         char* line = trans_InterCode(tmp -> code);
-        //printf("33333\n");
         if (strlen(line) && file != NULL) fprintf(fp, "%s\n", line);
         else if (strlen(line)) printf("%s\n", line);
         tmp = tmp -> next;
-        //printf("22222\n");
-        //printf("1111\n");
     }
-    //printf("1111\n");
     if (file != NULL) fclose(fp);
 }
 
@@ -151,6 +143,7 @@ CodeList trans_FunDec(struct Node* node){
     FunDec → ID LP VarList RP
     | ID LP RP
     */
+    //printf("2222222 %d\n", node -> lineNum);
     struct Node* child = node -> child;
     FieldList look = lookup_hash(child -> TYPE_ID);
     //printf("%s\n", child -> TYPE_ID);
@@ -168,7 +161,10 @@ CodeList trans_FunDec(struct Node* node){
         else if (paras -> type -> kind == ARRAY /*|| paras -> type -> kind == STRUCTURE*/) op = new_temp(ADDRESS);
         para -> u.op = op;
         FieldList look = lookup_hash(paras -> name); // param has a global scope
+        //printf("%s\n", paras -> name);
         look -> op = op;
+        //printf("2222222 %d\n", node -> lineNum);
+        //assert(look -> op != NULL);
         code = Join_intercode(code, new_codelist(para));
         paras = paras -> tail;
     }
@@ -295,6 +291,11 @@ CodeList trans_Exp(struct Node* node, Operand place){
             return code1;
         }
         if (!strcmp(node -> child -> name, "ID\0")){
+            char* name = node -> child -> TYPE_ID;
+            FieldList tmp = lookup_hash(name);
+            //assert(tmp -> op != NULL);
+            //printf("333333 %d\n", node -> lineNum);
+            //printf("%s\n", name);
             Operand op = look_up_hash(node -> child);
             InterCode code = new_intercode(ASSIGN_i);
             code -> u.assign.left = place;
@@ -388,6 +389,7 @@ CodeList trans_Exp(struct Node* node, Operand place){
         else if (!strcmp(node -> child -> brother -> name, "LP\0")){
             FieldList look = lookup_hash(node -> child -> TYPE_ID);
             if (!strcmp(look -> name, "read\0")){
+                //printf("1111\n");
                 if (place == NULL) return NULL;
                 InterCode code = new_intercode(READ);
                 code -> u.op = place;
@@ -436,7 +438,7 @@ CodeList trans_Exp(struct Node* node, Operand place){
             code -> u.binop.operand1 = tmp2;
             //printf("11111\n");
             code -> u.binop.operand2 = new_constant(get_array_size(node));
-            printf("11111\n");
+            //printf("11111\n");
             //printf("%d\n", get_array_size(node));
             code -> u.binop.result = tmp3;
             CodeList code3 = new_codelist(code);
@@ -697,8 +699,12 @@ CodeList trans_ExtDef(struct Node* ExtDef){
     struct Node* child = ExtDef -> child -> brother;
     if (childsize(ExtDef) == 3 && !strcmp(child -> name, "FunDec\0")){
         struct Node* brother = child -> brother;
-        //printf("%d\n", child -> lineNum);
-        return Join_intercode(trans_FunDec(child), trans_CompSt(brother));
+        //printf("11111111 %d\n", child -> lineNum);
+        CodeList code1 = trans_FunDec(child);
+        //printf("11111\n");
+        CodeList code2 = trans_CompSt(brother);
+        //printf("444444\n");
+        return Join_intercode(code1, code2);
     }
     return NULL;
 }   
@@ -777,6 +783,7 @@ CodeList new_codelist(InterCode code){
 }
 
 Operand look_up_hash(struct Node* node){
+    assert(node -> TYPE_ID != NULL);
     char* name = node -> TYPE_ID;
     FieldList tmp = lookup_hash(name);
     assert(tmp != NULL);
