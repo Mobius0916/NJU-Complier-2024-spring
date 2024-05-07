@@ -5,6 +5,9 @@
 #include <assert.h>
 #include "HashMap.h"
 #include "Node.h"
+#include "intercode.h"
+#include "semantic.h"
+
 extern unsigned SemanticError;
 HashNode HashMap[HASHMAP_SIZE];
 
@@ -12,7 +15,43 @@ void init_hash(){
 	for(int i = 0; i < HASHMAP_SIZE; ++i){
 		HashMap[i] = NULL;
 	}
-	
+
+	FieldList read_ = (FieldList) malloc(sizeof(struct FieldList_)); 
+	read_ -> name = (char*) malloc(10 * sizeof(char));
+	strcpy(read_ -> name, "read");
+	read_ -> tail = NULL;
+	read_ -> type = (Type) malloc(sizeof(struct Type_));
+	read_ -> type -> kind = FUNCTION; 
+	read_ -> type -> u.func.is_extern = 0;
+	read_ -> type -> u.func.argv = NULL;
+	read_ -> type -> u.func.argc = 0;
+	Type tmp = (Type) malloc(sizeof(struct Type_));
+	tmp -> kind = BASIC;
+	tmp -> u.basic = 0;
+	read_ -> type -> u.func.ret = tmp;
+	insert_hash(read_);
+
+	FieldList write_ = (FieldList) malloc(sizeof(struct FieldList_)); 
+	write_ -> name = (char*) malloc(10 * sizeof(char));
+	strcpy(write_ -> name, "write");
+	write_ -> tail = NULL;
+	write_ -> type = (Type) malloc(sizeof(struct Type_));
+	write_ -> type -> kind = FUNCTION; 
+	write_ -> type -> u.func.is_extern = 0;
+	FieldList argv = (FieldList) malloc(sizeof(struct FieldList_));
+	argv -> name =  (char*) malloc(10 * sizeof(char));
+	strcpy(argv -> name, "argvwrite");
+	Type Int = (Type) malloc(sizeof(struct Type_));
+	Int -> kind = BASIC;
+	Int -> u.basic = 0;
+	argv -> type = Int;
+	write_ -> type -> u.func.argv = argv;
+	write_ -> type -> u.func.argc = 1;
+	tmp = (Type) malloc(sizeof(struct Type_));
+	tmp -> kind = BASIC;
+	tmp -> u.basic = 0;
+	write_ -> type -> u.func.ret = tmp;
+	insert_hash(write_);
 }
 unsigned hash_pjw(char* name){
 	unsigned val = 0, i;
@@ -30,7 +69,6 @@ HashNode insert_hash(FieldList field){
 	unsigned i;
 	if(field -> name == NULL) i = 1;
 	else i = hash_pjw(field -> name);
-	//printf("%s,%d\n",field->name,i);
 	HashNode Node = (HashNode) malloc(sizeof(struct HashNode_));
 	Node -> field = field;
 	Node -> next = NULL;
@@ -138,7 +176,6 @@ void printhashNode(FieldList Node){
 				printSpace(1);
 				printhashNode(tmp);
 			}
-			//printf("Size : %d\n", getsize(Node -> type));
 		}
 	else if(Node -> type -> kind == FUNCTION){
 		printf("function: %s, argc:%d, is_extern:%d, argv:\n",Node -> name, Node -> type -> u.func.argc, Node -> type -> u.func.is_extern);
@@ -170,7 +207,7 @@ void PrintSemErr(unsigned type, unsigned linenum, char* elem){
 	 elem = (char*) malloc(sizeof(char));
 	 elem[0] = ' ';
 	}
-	switch(type){
+	/*switch(type){
 		case 1 : printf("Error type %d at Line %d:Undefined variable '%s'.\n", type, linenum, elem); break;
 		case 2 : printf("Error type %d at Line %d:Undefined function '%s'.\n", type, linenum, elem); break;
 		case 3 : printf("Error type %d at Line %d:Redefined variable '%s'.\n", type, linenum, elem); break;
@@ -191,7 +228,7 @@ void PrintSemErr(unsigned type, unsigned linenum, char* elem){
 		case 18 : printf("Error type %d at Line %d:Undefined function '%s'\n", type, linenum, elem); break;
 		case 19 : printf("Error type %d at Line %d:Inconsistent declaration of function '%s'.\n", type, linenum, elem); break;
 		default : printf("Undefined Error!\n");
-	}
+	}*/
 }
 
 bool TypeMatch(Type a, Type b){
@@ -272,10 +309,10 @@ int getsize(Type type){
 		if (type -> kind == STRUCTURE) return getsize(type -> u.structure -> type);
 }
 
-int get_array_size(struct Node* Exp){
-	assert(!strcmp(Exp -> child -> brother -> name, "LB\0"));
-	FieldList look = lookup_hash(Exp -> child -> TYPE_ID);
-	return getsize(look -> type -> u.array.elem);
+int get_array_size(struct Node* node){
+	assert(!strcmp(node -> child -> brother -> name, "LB\0"));
+	Type type = Exp(node -> child);
+	return getsize(type -> u.array.elem);
 }
 
 int get_struct_offset(Type type, char* name){

@@ -8,7 +8,6 @@ unsigned SemanticError=0;
 void semantic_anyasis(struct Node* node)
 {
 	init_hash();
-	//printf("1");
 	Program(node);
 	CheckUndefFunc();
 }
@@ -75,7 +74,6 @@ Type Specifier(struct Node* node){
 	else{
 		StructSpecifier(child, type);
 	}
-	//printf("%d\n", getsize(type));
 	return type;
 };
 
@@ -407,7 +405,6 @@ Type Exp(struct Node* node){
 			struct Node* brother = child -> brother;
 			FieldList result = lookup_hash(child -> TYPE_ID);
 			if(brother == NULL){//ID
-				//printf("Exp->ID:%s\n",child->TYPE_ID);
 				if(result == NULL || result -> type -> kind == STRUCTTAG || result -> type -> kind == FUNCTION){
 					PrintSemErr(1, node -> lineNum,child -> TYPE_ID);
 					SemanticError++;

@@ -1,16 +1,78 @@
-struct Position
-{
-    float x,y;
-    int a[500][20];
+struct B {
+  int x[2][2][2];
+  int y[2][2][2];
 };
 
-int func(int a)
-{
-    return a;
+struct D {
+  int x[2][2];
+  int y[2][2];
+};
+
+struct C {
+  int x[2][2];
+  struct D d[2][2];
+};
+
+struct A {
+  struct B b[2];
+  struct C c[2][2];
+};
+
+int set2(int x[2][2], int start) {
+  int i = 0;
+  while (i < 2) {
+    int j = 0;
+    while (j < 2) {
+      x[i][j] = start;
+      start = start + 1;
+      j = j + 1;
+    }
+    i = i + 1;
+  }
+  return start;
 }
 
-int main(int b)
-{
-    int c = 5;
-    if (b > 2) func(c);
+int set3(int x[2][2][2], int start) {
+  int i = 0;
+  while (i < 2) {
+    start = set2(x[i], start);
+    i = i + 1;
+  }
+  return start;
+}
+
+
+
+
+int get2(int x[2][2], int start) {
+  int i = 0;
+  while (i < 2) {
+    int j = 0;
+    while (j < 2) {
+      write(x[i][j]);
+      start = start + 1;
+      j = j + 1;
+    }
+    i = i + 1;
+  }
+  return start;
+}
+
+int get3(int x[2][2][2], int start) {
+  int i = 0;
+  while (i < 2) {
+    start = get2(x[i], start);
+    i = i + 1;
+  }
+  return start;
+}
+
+
+int main() {
+  struct A a[2];
+  //write(seta1(a, 0));
+  //write(geta1(a, 0));
+  a[1] = a[0];
+  //write(geta1(a, 0));
+  return 0;
 }
