@@ -149,6 +149,7 @@ Args : Exp COMMA Args { $$ = creatNode($1, "Args\0", @$.first_line); $1 -> broth
 #include "lex.yy.c"
 #include "semantic.h"
 #include "HashMap.h"
+#include "objectcode.h"
 int yylex();
 
 int main(int argc, char** argv) {
@@ -170,8 +171,10 @@ int main(int argc, char** argv) {
         //printf("Semantic anyasis end!\n");
 	    //PrintMap();
         //printf("Build intercodes begin !\n");
-		if (argc >= 3) inter_code(argv[2], root);
+		if (argc > 3) inter_code(argv[2], root);
         else inter_code(NULL, root);
+        //printf("End trans intercode\n");
+        translate(argv[2]);
         //printf("Build intercodes end !\n");
 	}
     return 0;

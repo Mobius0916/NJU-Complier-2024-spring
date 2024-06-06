@@ -36,13 +36,15 @@ struct CodeList_{
     CodeList next; 
 };
 
+extern CodeList InterCodes;
+
 char* trans_InterCode(InterCode code);
 
 char* trans_Operand(Operand op);
 
 CodeList Join_intercode(CodeList code1, CodeList code2);
 
-CodeList trans_FunDec(struct Node* FuncDec);
+CodeList trans_FunDec(struct Node* node);
 
 CodeList trans_Stmt(struct Node* Stmt);
 
@@ -62,13 +64,13 @@ CodeList trans_DefList(struct Node* DefList);
 
 CodeList trans_StmtList(struct Node* StmtList);
 
-CodeList trans_CompSt(struct Node* CompSt);
+CodeList trans_CompSt(struct Node* node);
 
-CodeList trans_ExtDef(struct Node* ExtDef);
+CodeList trans_ExtDef(struct Node* node);
 
-CodeList trans_ExtDefList(struct Node* ExtDefList);
+CodeList trans_ExtDefList(struct Node* node);
 
-CodeList trans_Program(struct Node* Program);
+CodeList trans_Program(struct Node* node);
 
 void inter_code(char* file, struct Node* root);
 
